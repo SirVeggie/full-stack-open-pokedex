@@ -55,6 +55,24 @@ jobs:
           delay: 5
           rollbackonhealthcheckfailed: true
           
+      - name: Deployment success
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+        with:
+          severity: info
+          text: Pokedex deployed
+          description: to https://pokedex-fso-veggie.herokuapp.com/
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          
+      - name: Deployment failure
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ failure() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+        with:
+          severity: error
+          text: Build failed
+          description: Commit ${{ github.event.head_commit.url }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          
   tag_release:
     if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
     needs: [simple_dep_pipeline]
@@ -66,39 +84,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: 'patch'
-  
-  status_notification:
-    if: ${{ always() && github.event_name == 'push' }}
-    needs: [simple_dep_pipeline]
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Deployment success
-        uses: rjstone/discord-webhook-notify@v1
-        if: ${{ success() }}
-        with:
-          severity: info
-          text: Pokedex deployed
-          description: to https://pokedex-fso-veggie.herokuapp.com/
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-          
-      - name: Deployment failure
-        uses: rjstone/discord-webhook-notify@v1
-        if: ${{ failure() }}
-        with:
-          severity: error
-          text: Build failed
-          description: Commit ${{ github.event.head_commit.url }}
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-        
-      - name: Deployment cancelled
-        uses: rjstone/discord-webhook-notify@v1
-        if: ${{ cancelled() }}
-        with:
-          severity: warn
-          text: Build cancelled
-          description: Commit ${{ github.event.head_commit.url }}
-          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
-      
       
 
 
