@@ -66,3 +66,47 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: 'patch'
+  
+  status_notification:
+    if: ${{ github.event_name == 'push' }}
+    needs: [simple_dep_pipeline]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Deployment success
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ success() }}
+        with:
+          severity: info
+          description: to https://pokedex-fso-veggie.herokuapp.com/
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+          
+      - name: Deployment failure
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ failure() }}
+        with:
+          severity: error
+          description: Commit ${{ github.event.head_commit.url }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+        
+      - name: Deployment cancelled
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ cancelled() }}
+        with:
+          severity: warn
+          description: Commit ${{ github.event.head_commit.url }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
