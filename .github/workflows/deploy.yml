@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: message
         env:
-          PULL_MESSAGE: ${{ toJson(github.event.message) }}
+          PULL_MESSAGE: ${{ toJson(github.event.head_commit.message) }}
         run: echo "$PULL_MESSAGE"
           
   simple_dep_pipeline:
@@ -69,7 +69,9 @@ jobs:
     needs: [simple_dep_pipeline]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@1.36.0
         env:
