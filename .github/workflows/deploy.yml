@@ -68,7 +68,7 @@ jobs:
           DEFAULT_BUMP: 'patch'
   
   status_notification:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ always() && github.event_name == 'push' }}
     needs: [simple_dep_pipeline]
     runs-on: ubuntu-20.04
     steps:
@@ -100,16 +100,6 @@ jobs:
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
       
       
-
-
-
-
-
-
-
-
-
-
 
 
 
